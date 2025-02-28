@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ReportFormScreen extends StatefulWidget {
   const ReportFormScreen({super.key});
@@ -59,6 +61,56 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
     });
   }
 
+  Future<void> _sendReport() async {
+    if (_selectedIncidentType == null ||
+        _selectedDate == null ||
+        _selectedTime == null ||
+        _selectedLocation == null ||
+        _descriptionController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
+    final url = Uri.parse(
+        "https://b8e4-2409-40e6-20b-513f-8880-19f4-1121-9b25.ngrok-free.app/api/reports");
+
+    final Map<String, dynamic> reportData = {
+      "incidentType": _selectedIncidentType,
+      "date": _selectedDate!.toIso8601String(),
+      "time":
+          "${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}",
+      "location": {
+        "latitude": _selectedLocation!.latitude,
+        "longitude": _selectedLocation!.longitude,
+      },
+      "description": _descriptionController.text,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(reportData),
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Report submitted successfully!")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to submit report: ${response.body}")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,6 +128,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Incident Type Dropdown
             const Text(
               "Select Incident Type",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -83,6 +136,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _selectedIncidentType,
+              dropdownColor: Colors.black,
               items: _incidentTypes.map((String type) {
                 return DropdownMenuItem<String>(
                   value: type,
@@ -100,6 +154,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Date Picker
             const Text(
               "Select Date of Crime",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -129,6 +185,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Time Picker
             const Text(
               "Select Time of Crime",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -158,6 +216,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Google Map for Location Selection
             const Text(
               "Select Incident Location",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -179,7 +239,11 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                   onMapCreated: (GoogleMapController controller) {
                     _mapController = controller;
                   },
-                  onTap: _onMapTap,
+                  onTap: (LatLng tappedPoint) {
+                    setState(() {
+                      _selectedLocation = tappedPoint;
+                    });
+                  },
                   markers: _selectedLocation != null
                       ? {
                           Marker(
@@ -191,14 +255,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            if (_selectedLocation != null)
-              Text(
-                "Location: ${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}",
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
             const SizedBox(height: 20),
+
+            // Description Field
             const Text(
               "Description",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -207,12 +266,14 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             TextField(
               controller: _descriptionController,
               maxLines: 4,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: "Enter details about the incident...",
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 30),
+
+            // Submit Button
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -220,13 +281,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 ),
-                onPressed: () {
-                  print("Incident Type: $_selectedIncidentType");
-                  print("Date: $_selectedDate");
-                  print("Time: $_selectedTime");
-                  print("Location: $_selectedLocation");
-                  print("Description: ${_descriptionController.text}");
-                },
+                onPressed: _sendReport,
                 child: const Text(
                   "Submit Report",
                   style: TextStyle(fontSize: 18, color: Colors.white),

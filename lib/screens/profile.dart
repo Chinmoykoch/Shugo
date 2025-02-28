@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shugo/navigation.dart';
+import 'package:shugo/screens/auth.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key});
@@ -48,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
                 value: '+91 98765 43210',
               ),
               const Spacer(),
-              logoutButton(),
+              logoutButton(context),
               const SizedBox(height: 20),
             ],
           ),
@@ -101,32 +103,38 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget logoutButton() {
-    return Container(
-      width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEF4040),
-        borderRadius: BorderRadius.circular(12),
+  Widget logoutButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AuthScreen()),
       ),
-      child: const Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.logout,
-              color: Colors.white,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Logout',
-              style: TextStyle(
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          color: const Color(0xFFEF4040),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.logout,
                 color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
               ),
-            ),
-          ],
+              SizedBox(width: 8),
+              Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
