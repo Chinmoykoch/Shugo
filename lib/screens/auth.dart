@@ -3,6 +3,7 @@ import 'package:location/location.dart';
 import 'package:shugo/navigation.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -108,12 +109,17 @@ class _AuthScreenState extends State<AuthScreen>
     );
   }
 
+  Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', token);
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
     final url = Uri.parse(isLogin
-        ? 'https://b8e4-2409-40e6-20b-513f-8880-19f4-1121-9b25.ngrok-free.app/api/auth/login'
-        : 'https://b8e4-2409-40e6-20b-513f-8880-19f4-1121-9b25.ngrok-free.app/api/auth/register');
+        ? 'https://9880-2409-40e6-20b-513f-8880-19f4-1121-9b25.ngrok-free.app/api/auth/login'
+        : 'https://9880-2409-40e6-20b-513f-8880-19f4-1121-9b25.ngrok-free.app/api/auth/register');
 
     Map<String, dynamic> body = {
       'email': _emailController.text,
@@ -148,7 +154,7 @@ class _AuthScreenState extends State<AuthScreen>
 
         // Save token if needed
         final token = responseData['token']; // Save it using SharedPreferences
-
+        saveToken(token);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Navigation()),

@@ -141,8 +141,11 @@ class _HomepageState extends State<Homepage> {
           // ),
           const SizedBox(height: 10),
           FloatingActionButton(
-            backgroundColor: Colors.green,
-            child: const Icon(LucideIcons.megaphone),
+            backgroundColor: Colors.red,
+            child: const Icon(
+              Icons.sos,
+              color: Colors.white,
+            ),
             onPressed: () {
               MaptypeModal(context);
             },
