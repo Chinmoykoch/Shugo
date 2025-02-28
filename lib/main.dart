@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shugo/constants/texttheme.dart';
+import 'package:shugo/functions/fetchLocation.dart';
 import 'package:shugo/navigation.dart';
+import 'package:shugo/screens/auth.dart';
+import 'package:shugo/screens/homepage.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
+//gojosama
+//gojo
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -26,7 +31,7 @@ class MyApp extends StatelessWidget {
         ),
         textTheme: STextTheme.sTextTheme,
       ),
-      home: const Navigation(),
+      home: AuthScreen(),
     );
   }
 }
